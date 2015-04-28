@@ -120,9 +120,6 @@
 		window = [[MGTransparentWindow windowWithFrame:screen.frame] retain];
 		
 		// Configure window.
-		[window setReleasedWhenClosed:YES];
-		[window setHidesOnDeactivate:NO];
-		[window setCanHide:NO];
 		if( NSFoundationVersionNumber10_6 <= NSFoundationVersionNumber )
 			[window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorStationary];
 		else
@@ -309,11 +306,7 @@
 		helpWindow = [[MGTransparentWindow windowWithFrame:helpFrame] retain];
 		
 		// Configure window.
-		[helpWindow setReleasedWhenClosed:YES];
-		[helpWindow setHidesOnDeactivate:NO];
-		[helpWindow setCanHide:NO];
 		[helpWindow setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-		[helpWindow setIgnoresMouseEvents:YES];
 		
 		// Configure contentView.
 		NSView *contentView = [helpWindow contentView];

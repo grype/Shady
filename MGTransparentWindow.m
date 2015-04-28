@@ -18,6 +18,10 @@
         [self setAlphaValue:1.0];
         [self setOpaque:NO];
         [self setHasShadow:NO];
+    [self setReleasedWhenClosed:YES];
+    [self setHidesOnDeactivate:NO];
+    [self setCanHide:NO];
+    [self setIgnoresMouseEvents:YES];
     }
     
     return self;
