@@ -10,29 +10,29 @@
 	<string>Shady</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>3AE09CA7-213A-40F0-B3C4-CE31B326AA8A</key>
-		<string>https://github.com/mattgemmell/Shady.git</string>
+		<key>9BDCA5D1B5BC9104B487CF9BEE408AD305381C41</key>
+		<string>https://github.com/grype/Shady.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Shady.xcodeproj/project.xcworkspace</string>
+	<string>Shady.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>3AE09CA7-213A-40F0-B3C4-CE31B326AA8A</key>
+		<key>9BDCA5D1B5BC9104B487CF9BEE408AD305381C41</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/mattgemmell/Shady.git</string>
+	<string>https://github.com/grype/Shady.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>3AE09CA7-213A-40F0-B3C4-CE31B326AA8A</string>
+	<string>9BDCA5D1B5BC9104B487CF9BEE408AD305381C41</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>3AE09CA7-213A-40F0-B3C4-CE31B326AA8A</string>
+			<string>9BDCA5D1B5BC9104B487CF9BEE408AD305381C41</string>
 			<key>IDESourceControlWCCName</key>
 			<string>Shady</string>
 		</dict>

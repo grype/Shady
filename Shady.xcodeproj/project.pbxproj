@@ -12,6 +12,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		C4A933821AEB8087008F88E4 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4A933811AEB8086008F88E4 /* IOKit.framework */; };
 		C9119049109F74D900EE7B84 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9119048109F74D900EE7B84 /* QuartzCore.framework */; };
 		C940E3F610A05A36001EE8BF /* Shady.icns in Resources */ = {isa = PBXBuildFile; fileRef = C940E3F510A05A36001EE8BF /* Shady.icns */; };
 		C940E40A10A05CB6001EE8BF /* Shady_Subdued.icns in Resources */ = {isa = PBXBuildFile; fileRef = C940E40910A05CB6001EE8BF /* Shady_Subdued.icns */; };
@@ -54,6 +55,7 @@
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Shady-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Shady-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Shady.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Shady.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4A933811AEB8086008F88E4 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		C9119048109F74D900EE7B84 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C940E3F510A05A36001EE8BF /* Shady.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Shady.icns; sourceTree = "<group>"; };
 		C940E40910A05CB6001EE8BF /* Shady_Subdued.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Shady_Subdued.icns; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4A933821AEB8087008F88E4 /* IOKit.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				C9119049109F74D900EE7B84 /* QuartzCore.framework in Frameworks */,
 				C9906ECA10A4C51C003C9798 /* Carbon.framework in Frameworks */,
@@ -166,6 +169,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C4A933811AEB8086008F88E4 /* IOKit.framework */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);

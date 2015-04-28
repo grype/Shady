@@ -5,10 +5,13 @@
 //  Created by Matt Gemmell on 02/11/2009.
 //
 
-#import "ShadyAppDelegate.h"
-#import <QuartzCore/QuartzCore.h>
 #import "MGTransparentWindow.h"
 #import "NSApplication+DockIcon.h"
+#import "ShadyAppDelegate.h"
+#import <QuartzCore/QuartzCore.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <IOKit/IOKitLib.h>
+#import <mach/mach.h>
 
 #define OPACITY_UNIT				0.05; // "20 shades ought to be enough for _anybody_."
 #define DEFAULT_OPACITY				0.4
@@ -25,20 +28,30 @@
 #define STATUS_MENU_ICON_OFF_ALT	[NSImage imageNamed:@"Shady_Menu_Light_Off"]
 
 #define MAX_OPACITY					0.90 // the darkest the screen can be, where 1.0 is pure black.
+#define KEY_USER_OPACITY        @"ShadeSavedUserOpacityKey" // name of user opacity setting.
 #define KEY_OPACITY					@"ShadySavedOpacityKey" // name of the saved opacity setting.
 #define KEY_DOCKICON				@"ShadySavedDockIconKey" // name of the saved dock icon state setting.
 #define KEY_ENABLED					@"ShadySavedEnabledKey" // name of the saved primary state setting.
+#define KEY_AUTOBRIGHTNESS  @"ShadySavedAutoBrightnessKey"  // name of the saved auto-brightness setting.
 
-@implementation ShadyAppDelegate
+#define MAX_LMU_VALUE           67092480  // ambient light sensor's max value
+#define AUTOBRIGHTNESS_INTERVAL 2.0 // timer interval (in seconds) for LMU query to automatically adjust brightness
+
+@implementation ShadyAppDelegate {
+  NSTimer *_autoBrightnessTimer;
+  io_connect_t _dataPort;
+  BOOL _autoBrightnessEnabled;
+}
 
 @synthesize opacity;
+@synthesize userOpacity;
 @synthesize statusMenu;
 @synthesize opacitySlider;
 @synthesize prefsWindow;
 @synthesize dockIconCheckbox;
 @synthesize stateMenuItemMainMenu;
 @synthesize stateMenuItemStatusBar;
-
+@synthesize autoBrightness;
 
 #pragma mark Setup and Tear-down
 
@@ -46,12 +59,14 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
 	// Set the default opacity value and load any saved settings.
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-	[defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-										 [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_OPACITY,
-										 [NSNumber numberWithBool:YES], KEY_DOCKICON,
-										 [NSNumber numberWithBool:YES], KEY_ENABLED,
-										 nil]];
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
+                              [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_OPACITY,
+                              [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_USER_OPACITY,
+                              [NSNumber numberWithBool:YES], KEY_DOCKICON,
+                              [NSNumber numberWithBool:YES], KEY_ENABLED,
+                              [NSNumber numberWithBool:NO], KEY_AUTOBRIGHTNESS,
+                              nil]];
 	
 	// Set up Dock icon.
 	BOOL showsDockIcon = [defaults boolForKey:KEY_DOCKICON];
@@ -60,7 +75,13 @@
 		// Only set it here if it's YES, since we've just read a saved default and we always start with no Dock icon.
 		[NSApp setShowsDockIcon:showsDockIcon];
 	}
-	
+  
+  // Set up Auto Brightness
+  BOOL isAutoBrightnessEnabled = [defaults boolForKey:KEY_AUTOBRIGHTNESS];
+  [autoBrightness setState:(isAutoBrightnessEnabled) ? NSOnState : NSOffState];
+  if (isAutoBrightnessEnabled) {
+    [self setAutoBrightnessEnabled:isAutoBrightnessEnabled];
+  }
 	
 	// Activate statusItem.
 	NSStatusBar *bar = [NSStatusBar systemStatusBar];
@@ -89,7 +110,6 @@
 	
 	// Put this app into the background (the shade won't hide due to how its window is set up above).
 	[NSApp hide:self];
-	
 }
 
 
@@ -107,6 +127,8 @@
 	
 	windows = nil; // released when closed.
 	helpWindow = nil; // released when closed.
+  
+  [self setAutoBrightnessEnabled:NO];
 	
 	[super dealloc];
 }
@@ -144,6 +166,7 @@
 	
 	[self updateEnabledStatus];
 	self.opacity = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_OPACITY];
+  self.userOpacity = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_USER_OPACITY];
 	
 	// Put window on screen.
 	[windows makeObjectsPerformSelector:@selector(makeKeyAndOrderFront:) withObject:self];
@@ -239,7 +262,7 @@
 
 - (IBAction)opacitySliderChanged:(id)sender
 {
-	self.opacity = (1.0 - [sender floatValue]);
+	self.opacity = self.userOpacity = (1.0 - [sender floatValue]);
 }
 
 
@@ -257,6 +280,14 @@
 {
 	shadyEnabled = !shadyEnabled;
 	[self updateEnabledStatus];
+}
+
+- (IBAction)toggleAutoBrightness:(id)sender {
+  BOOL enabled = [sender state] != NSOffState;
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:enabled forKey:KEY_AUTOBRIGHTNESS];
+  [defaults synchronize];
+  [self setAutoBrightnessEnabled:enabled];
 }
 
 
@@ -371,35 +402,164 @@
 	
 	// Enable/disable slider.
 	[opacitySlider setEnabled:shadyEnabled];
+  
+  if (!shadyEnabled) {
+    [self setAutoBrightnessEnabled:NO];
+  }
+  else {
+    [self setAutoBrightnessEnabled:[defaults boolForKey:KEY_AUTOBRIGHTNESS]];
+  }
 }
 
+#pragma mark Auto Brightness
+- (void)setAutoBrightnessEnabled:(BOOL)enabled
+{
+  if (enabled == _autoBrightnessEnabled) {
+    return;
+  }
+  
+  _autoBrightnessEnabled = enabled;
+  
+  if (enabled) {
+    kern_return_t kr;
+    
+    io_service_t serviceObject = IOServiceGetMatchingService(kIOMasterPortDefault,
+                                                             IOServiceMatching("AppleLMUController"));
+    if (!serviceObject) {
+      NSLog(@"failed to find ambient light sensor");
+      return;
+    }
+    
+    kr = IOServiceOpen(serviceObject, mach_task_self(), 0, &_dataPort);
+    IOObjectRelease(serviceObject);
+    if (kr != KERN_SUCCESS) {
+      NSLog(@"IOServiceOpen: %i", kr);
+      return; 
+    }
+    
+    _autoBrightnessTimer = [NSTimer timerWithTimeInterval:AUTOBRIGHTNESS_INTERVAL
+                                                   target:self
+                                                 selector:@selector(updateBrightnessFromLMU)
+                                                 userInfo:nil
+                                                  repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:_autoBrightnessTimer
+                              forMode:NSDefaultRunLoopMode];
+  }
+  else {
+    if (_dataPort) {
+      IOServiceClose(&_dataPort);
+      IOObjectRelease(_dataPort);
+      _dataPort = 0;
+    }
+    if (_autoBrightnessTimer != nil) {
+      [_autoBrightnessTimer invalidate];
+    }
+    _autoBrightnessTimer = nil;
+  }
+}
+
+- (BOOL)isAutoBrightnessEnabled
+{
+  return [[NSUserDefaults standardUserDefaults] boolForKey:KEY_AUTOBRIGHTNESS];
+}
+
+- (void)updateBrightnessFromLMU
+{
+  float currentLMUValue = [self currentLMUValue];
+  if (currentLMUValue == NSNotFound) {
+    return;
+  }
+  
+  NSScreen *nativeScreen = [[NSScreen screens] firstObject];
+  NSMutableArray *targetWindows = [NSMutableArray array];
+  for (NSWindow *window in windows) {
+    if (window.screen == nativeScreen) {
+      continue;
+    }
+    [targetWindows addObject:window];
+  }
+  
+  float newOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
+  newOpacity = MAX(self.userOpacity, roundf(newOpacity * 100.)/100.);
+  NSLog(@"LMU: %f; opacity: %f; maxOpacity: %f", currentLMUValue, newOpacity, self.userOpacity);
+  
+  [self setOpacity:newOpacity onWindows:targetWindows withDuration:1.33];
+}
+
+- (float) currentLMUValue {
+  uint32_t outputs = 2;
+  uint64_t values[outputs];
+  
+  kern_return_t kr = IOConnectCallMethod(_dataPort, 0, nil, 0, nil, 0, values, &outputs, nil, 0);
+  uint64_t left = values[0];
+  uint64_t right = values[1];
+  
+  if (kr == KERN_SUCCESS) {
+    return (left + right)/2.;
+  }
+  
+  if (kr != kIOReturnBusy) {
+    NSLog(@"I/O Kit error: %i", kr);
+  }
+  
+  return NSNotFound;
+}
 
 #pragma mark Accessors
 
+- (void)setOpacity:(float)newOpacity
+         onScreens:(NSArray *)screens
+      withDuration:(NSTimeInterval)duration
+{
+  if (screens == nil) {
+    screens = @[[NSScreen mainScreen]];
+  }
+  NSMutableArray *targetWindows = [NSMutableArray array];
+  for (MGTransparentWindow *window in windows) {
+    for (NSScreen *screen in screens) {
+      if (window.screen == screen) {
+        [targetWindows addObject:window];
+        break;
+      }
+    }
+  }
+  [self setOpacity:newOpacity onWindows:targetWindows withDuration:duration];
+}
+
+- (void)setOpacity:(float)newOpacity
+         onWindows:(NSArray *)targetWindows
+      withDuration:(NSTimeInterval)duration
+{
+  float normalisedOpacity = MIN(MAX_OPACITY, MAX(newOpacity, 0.0));
+  if (normalisedOpacity != opacity) {
+    opacity = normalisedOpacity;
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setFloat:opacity forKey:KEY_OPACITY];
+    [defaults synchronize];
+  }
+  
+  if (targetWindows == nil) {
+    targetWindows = windows;
+  }
+  
+  for(MGTransparentWindow* window in targetWindows) {
+    [window setOpacity:newOpacity duration:duration];
+  }
+  
+  [opacitySlider setFloatValue:(1.0 - opacity)];
+}
 
 - (void)setOpacity:(float)newOpacity
 {
-	float normalisedOpacity = MIN(MAX_OPACITY, MAX(newOpacity, 0.0));
-	if (normalisedOpacity != opacity) {
-		opacity = normalisedOpacity;
-		
-		NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-		[defaults setFloat:opacity forKey:KEY_OPACITY];
-		[defaults synchronize];
-		
-	}
-	
-	for( NSWindow* window in windows )
-		[[[window contentView] layer] setOpacity:opacity];
-	
-	[opacitySlider setFloatValue:(1.0 - opacity)];
-	
+  [self setOpacity:newOpacity
+         onScreens:nil
+      withDuration:0.];
 }
 
 -(float)opacity
 {
 	return opacity;
 }
-
 
 @end
