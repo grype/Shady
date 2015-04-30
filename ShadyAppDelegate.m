@@ -28,7 +28,7 @@
 #define STATUS_MENU_ICON_OFF_ALT	[NSImage imageNamed:@"Shady_Menu_Light_Off"]
 
 #define MAX_OPACITY					0.90 // the darkest the screen can be, where 1.0 is pure black.
-#define KEY_USER_OPACITY        @"ShadeSavedUserOpacityKey" // name of user opacity setting.
+#define KEY_OPACITY_OFFSET  @"ShadeSavedUserOpacityKey" // name of user opacity setting.
 #define KEY_OPACITY					@"ShadySavedOpacityKey" // name of the saved opacity setting.
 #define KEY_DOCKICON				@"ShadySavedDockIconKey" // name of the saved dock icon state setting.
 #define KEY_ENABLED					@"ShadySavedEnabledKey" // name of the saved primary state setting.
@@ -41,10 +41,11 @@
   NSTimer *_autoBrightnessTimer;
   io_connect_t _dataPort;
   BOOL _autoBrightnessEnabled;
+  float _lastKnownLMUValue;
 }
 
 @synthesize opacity;
-@synthesize userOpacity;
+@synthesize opacityOffset;
 @synthesize statusMenu;
 @synthesize opacitySlider;
 @synthesize prefsWindow;
@@ -62,7 +63,7 @@
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
                               [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_OPACITY,
-                              [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_USER_OPACITY,
+                              [NSNumber numberWithFloat:0.], KEY_OPACITY_OFFSET,
                               [NSNumber numberWithBool:YES], KEY_DOCKICON,
                               [NSNumber numberWithBool:YES], KEY_ENABLED,
                               [NSNumber numberWithBool:NO], KEY_AUTOBRIGHTNESS,
@@ -166,7 +167,7 @@
 	
 	[self updateEnabledStatus];
 	self.opacity = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_OPACITY];
-  self.userOpacity = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_USER_OPACITY];
+  self.opacityOffset = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_OPACITY_OFFSET];
 	
 	// Put window on screen.
 	[windows makeObjectsPerformSelector:@selector(makeKeyAndOrderFront:) withObject:self];
@@ -262,7 +263,9 @@
 
 - (IBAction)opacitySliderChanged:(id)sender
 {
-	self.opacity = self.userOpacity = (1.0 - [sender floatValue]);
+  float sliderValue = [sender floatValue];
+  self.opacityOffset += (1.0 - self.opacity) - sliderValue;
+	self.opacity = (1.0 - sliderValue);
 }
 
 
@@ -466,7 +469,8 @@
 - (void)updateBrightnessFromLMU
 {
   float currentLMUValue = [self currentLMUValue];
-  if (currentLMUValue == NSNotFound) {
+  if (currentLMUValue == NSNotFound
+      || _lastKnownLMUValue == currentLMUValue) {
     return;
   }
   
@@ -480,8 +484,10 @@
   }
   
   float newOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
-  newOpacity = MAX(self.userOpacity, roundf(newOpacity * 100.)/100.);
-  NSLog(@"LMU: %f; opacity: %f; maxOpacity: %f", currentLMUValue, newOpacity, self.userOpacity);
+  newOpacity = MIN(MAX_OPACITY, ((roundf(newOpacity * 100.)/100.) + self.opacityOffset));
+//  NSLog(@"LMU: %f; opacity: %f; offset: %f", currentLMUValue, newOpacity, self.opacityOffset);
+  
+  _lastKnownLMUValue = currentLMUValue;
   
   [self setOpacity:newOpacity onWindows:targetWindows withDuration:1.33];
 }

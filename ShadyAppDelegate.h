@@ -24,7 +24,7 @@
 }
 
 @property (assign) float opacity;
-@property (assign) float userOpacity;
+@property (assign) float opacityOffset;
 @property (assign) IBOutlet NSMenu *statusMenu;
 @property (assign) IBOutlet NSSlider *opacitySlider;
 @property (assign) IBOutlet NSPanel *prefsWindow;
