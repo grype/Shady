@@ -21,6 +21,7 @@
   NSButton *autoBrightnessCheckbox;
   NSButton *manageBuiltinDisplayCheckbox;
 	BOOL shadyEnabled;
+  NSButton *unifiedBrightnessCheckbox;
 }
 
 @property (assign) IBOutlet NSMenu *statusMenu;
@@ -33,6 +34,7 @@
 @property (assign) IBOutlet NSButton *manageBuiltinDisplayCheckbox;
 @property (assign, nonatomic) BOOL managesBuiltinDisplay;
 @property (readonly, nonatomic) BOOL hasBuiltinDisplay;
+@property (assign) IBOutlet NSButton *unifiedBrightnessCheckbox;
 
 
 - (IBAction)showAbout:(id)sender;
@@ -41,6 +43,7 @@
 - (IBAction)toggleEnabledStatus:(id)sender;
 - (IBAction)toggleAutoBrightness:(id)sender;
 - (IBAction)toggleBuiltinScreen:(id)sender;
+- (IBAction)toggleUnifiedBrightness:(id)sender;
 
 - (IBAction)increaseOpacity:(id)sender;
 - (IBAction)decreaseOpacity:(id)sender;

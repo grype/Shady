@@ -34,7 +34,8 @@
 #define KEY_ENABLED					@"ShadySavedEnabledKey" // name of the saved primary state setting.
 #define KEY_AUTOBRIGHTNESS  @"ShadySavedAutoBrightnessKey"  // name of the saved auto-brightness setting.
 #define KEY_BUILTIN_SCREEN  @"ShadySavedBuiltinScreenKey"  // name of the setting for managing built-in screen.
-#define KEY_OPACITY_INFO    @"ShadySavedOpacityInfoKey"   // name of saved per-screen opacity info
+#define KEY_OPACITY_INFO    @"ShadySavedOpacityInfoKey"   // name of saved per-screen opacity info.
+#define KEY_UNIFIED_BRIGHTNESS  @"ShadySavedUnifiedBrightnessKey" // name of setting for controlling brightness of all displays.
 
 #define MAX_LMU_VALUE           67092480  // ambient light sensor's max value
 #define AUTOBRIGHTNESS_INTERVAL 2.0 // timer interval (in seconds) for LMU query to automatically adjust brightness
@@ -59,6 +60,7 @@
 @synthesize autoBrightnessCheckbox;
 @synthesize manageBuiltinDisplayCheckbox;
 @synthesize managesBuiltinDisplay;
+@synthesize unifiedBrightnessCheckbox;
 
 #pragma mark Setup and Tear-down
 
@@ -73,6 +75,7 @@
                               [NSNumber numberWithBool:YES], KEY_AUTOBRIGHTNESS,
                               [NSNumber numberWithBool:NO], KEY_BUILTIN_SCREEN,
                               [NSDictionary dictionary], KEY_OPACITY_INFO,
+                              [NSNumber numberWithBool:NO], KEY_UNIFIED_BRIGHTNESS,
                               nil]];
   
   NSDictionary *info = [defaults dictionaryForKey:KEY_OPACITY_INFO];
@@ -101,6 +104,9 @@
   self.managesBuiltinDisplay = managesBuiltinScreen;
   [manageBuiltinDisplayCheckbox setState:(managesBuiltinScreen) ? NSOnState : NSOffState];
   [manageBuiltinDisplayCheckbox setEnabled:hasBuiltinScreen];
+  
+  BOOL unifiedBrightness = [defaults boolForKey:KEY_UNIFIED_BRIGHTNESS];
+  [unifiedBrightnessCheckbox setState:(unifiedBrightness) ? NSOnState : NSOffState];
 	
 	// Activate statusItem.
 	NSStatusBar *bar = [NSStatusBar systemStatusBar];
@@ -321,9 +327,17 @@
   [defaults setObject:_opacityInfo forKey:KEY_OPACITY_INFO];
   [defaults synchronize];
 
-  [self setOpacity:opacity
-         onScreens:[NSArray arrayWithObject:mainScreen]
-      withDuration:0.];
+  BOOL unifiedBrightnessEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:KEY_UNIFIED_BRIGHTNESS];
+  if (unifiedBrightnessEnabled) {
+    [self setOpacity:opacity
+           onWindows:nil
+        withDuration:0.];
+  }
+  else {
+    [self setOpacity:opacity
+           onScreens:[NSArray arrayWithObject:mainScreen]
+        withDuration:0.];
+  }
 }
 
 
@@ -343,7 +357,8 @@
 	[self updateEnabledStatus];
 }
 
-- (IBAction)toggleAutoBrightness:(id)sender {
+- (IBAction)toggleAutoBrightness:(id)sender
+{
   BOOL enabled = [sender state] != NSOffState;
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setBool:enabled forKey:KEY_AUTOBRIGHTNESS];
@@ -351,7 +366,8 @@
   [self setAutoBrightnessEnabled:enabled];
 }
 
-- (IBAction)toggleBuiltinScreen:(id)sender {
+- (IBAction)toggleBuiltinScreen:(id)sender
+{
   BOOL enabled = [sender state] != NSOffState;
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setBool:enabled forKey:KEY_BUILTIN_SCREEN];
@@ -359,6 +375,17 @@
   self.managesBuiltinDisplay = enabled;
 }
 
+- (IBAction)toggleUnifiedBrightness:(id)sender
+{
+  BOOL enabled = [sender state] != NSOffState;
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:enabled forKey:KEY_UNIFIED_BRIGHTNESS];
+  [defaults synchronize];
+  if (enabled == NO
+      && _autoBrightnessEnabled) {
+    [self updateBrightnessFromLMU];
+  }
+}
 
 - (void)keyDown:(NSEvent *)event
 {
@@ -637,7 +664,7 @@
       withDuration:(NSTimeInterval)duration
 {
   if (screens == nil) {
-    screens = @[[NSScreen mainScreen]];
+    screens = [NSArray arrayWithObject:[NSScreen mainScreen]];
   }
   NSMutableArray *targetWindows = [NSMutableArray array];
   for (MGTransparentWindow *window in windows) {
