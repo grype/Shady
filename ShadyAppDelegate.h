@@ -7,9 +7,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface ShadyAppDelegate : NSObject <NSWindowDelegate> {
-    NSArray *windows;
-	float opacity;
+@interface ShadyAppDelegate : NSObject <NSWindowDelegate, NSMenuDelegate> {
+    NSMutableArray *windows;
 	BOOL showsHelpWhenActive;
 	NSWindow *helpWindow;
 	NSMenu *statusMenu;
@@ -19,19 +18,20 @@
 	NSButton *dockIconCheckbox;
 	NSMenuItem *stateMenuItemMainMenu;
 	NSMenuItem *stateMenuItemStatusBar;
-  NSButton *autoBrightness;
+  NSButton *autoBrightnessCheckbox;
+  NSButton *manageBuiltinDisplayCheckbox;
 	BOOL shadyEnabled;
 }
 
-@property (assign) float opacity;
-@property (assign) float opacityOffset;
 @property (assign) IBOutlet NSMenu *statusMenu;
 @property (assign) IBOutlet NSSlider *opacitySlider;
 @property (assign) IBOutlet NSPanel *prefsWindow;
 @property (assign) IBOutlet NSButton *dockIconCheckbox;
 @property (assign) IBOutlet NSMenuItem *stateMenuItemMainMenu;
 @property (assign) IBOutlet NSMenuItem *stateMenuItemStatusBar;
-@property (assign) IBOutlet NSButton *autoBrightness;
+@property (assign) IBOutlet NSButton *autoBrightnessCheckbox;
+@property (assign) IBOutlet NSButton *manageBuiltinDisplayCheckbox;
+@property (assign, nonatomic) BOOL managesBuiltinDisplay;
 
 
 - (IBAction)showAbout:(id)sender;
@@ -39,6 +39,7 @@
 - (IBAction)toggleDockIcon:(id)sender;
 - (IBAction)toggleEnabledStatus:(id)sender;
 - (IBAction)toggleAutoBrightness:(id)sender;
+- (IBAction)toggleBuiltinScreen:(id)sender;
 
 - (IBAction)increaseOpacity:(id)sender;
 - (IBAction)decreaseOpacity:(id)sender;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <archive type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="8.00">
 	<data>
-		<int key="IBDocument.SystemTarget">1090</int>
+		<int key="IBDocument.SystemTarget">1050</int>
 		<string key="IBDocument.SystemVersion">13F1077</string>
 		<string key="IBDocument.InterfaceBuilderVersion">6751</string>
 		<string key="IBDocument.AppKitVersion">1265.21</string>
@@ -372,7 +372,7 @@
 				</array>
 			</object>
 			<object class="NSCustomView" id="727628101">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
 				<array class="NSMutableArray" key="NSSubviews">
 					<object class="NSTextField" id="439073888">
@@ -380,6 +380,8 @@
 						<int key="NSvFlags">265</int>
 						<string key="NSFrame">{{152, 10}, {36, 17}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="974717851">
 							<int key="NSCellFlags">68157504</int>
@@ -418,6 +420,8 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{5, 10}, {34, 17}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="365106183"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="861456655">
 							<int key="NSCellFlags">68157504</int>
@@ -436,6 +440,8 @@
 						<int key="NSvFlags">266</int>
 						<string key="NSFrame">{{42, 6}, {107, 21}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
+						<reference key="NSWindow"/>
+						<reference key="NSNextKeyView" ref="439073888"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSSliderCell" key="NSCell" id="867532400">
 							<int key="NSCellFlags">67371264</int>
@@ -455,12 +461,15 @@
 					</object>
 				</array>
 				<string key="NSFrameSize">{195, 34}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
+				<reference key="NSNextKeyView" ref="669160261"/>
 				<string key="NSClassName">NSView</string>
 			</object>
 			<object class="NSWindowTemplate" id="576659139">
 				<int key="NSWindowStyleMask">3</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{276, 862}, {335, 98}}</string>
+				<string key="NSWindowRect">{{276, 862}, {335, 118}}</string>
 				<int key="NSWTFlags">-461897728</int>
 				<string key="NSWindowTitle">Preferences</string>
 				<string key="NSWindowClass">NSPanel</string>
@@ -473,7 +482,7 @@
 						<object class="NSButton" id="390218461">
 							<reference key="NSNextResponder" ref="994031347"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{18, 62}, {122, 18}}</string>
+							<string key="NSFrame">{{18, 82}, {122, 18}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="202820342"/>
@@ -503,7 +512,7 @@
 						<object class="NSTextField" id="202820342">
 							<reference key="NSNextResponder" ref="994031347"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{38, 42}, {280, 14}}</string>
+							<string key="NSFrame">{{38, 62}, {280, 14}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="1070461374"/>
@@ -527,10 +536,10 @@
 						<object class="NSButton" id="1070461374">
 							<reference key="NSNextResponder" ref="994031347"/>
 							<int key="NSvFlags">268</int>
-							<string key="NSFrame">{{18, 18}, {220, 18}}</string>
+							<string key="NSFrame">{{18, 38}, {220, 18}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
 							<reference key="NSWindow"/>
-							<reference key="NSNextKeyView"/>
+							<reference key="NSNextKeyView" ref="501470364"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="777134564">
@@ -551,8 +560,35 @@
 							</object>
 							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 						</object>
+						<object class="NSButton" id="501470364">
+							<reference key="NSNextResponder" ref="994031347"/>
+							<int key="NSvFlags">268</int>
+							<string key="NSFrame">{{18, 18}, {171, 18}}</string>
+							<reference key="NSSuperview" ref="994031347"/>
+							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
+							<string key="NSReuseIdentifierKey">_NS:9</string>
+							<bool key="NSEnabled">YES</bool>
+							<object class="NSButtonCell" key="NSCell" id="978495358">
+								<int key="NSCellFlags">-2080374784</int>
+								<int key="NSCellFlags2">268435456</int>
+								<string key="NSContents">Manage built-in display</string>
+								<reference key="NSSupport" ref="972142069"/>
+								<string key="NSCellIdentifier">_NS:9</string>
+								<reference key="NSControlView" ref="501470364"/>
+								<int key="NSButtonFlags">1211912448</int>
+								<int key="NSButtonFlags2">2</int>
+								<reference key="NSNormalImage" ref="564898760"/>
+								<reference key="NSAlternateImage" ref="279716706"/>
+								<string key="NSAlternateContents"/>
+								<string key="NSKeyEquivalent"/>
+								<int key="NSPeriodicDelay">200</int>
+								<int key="NSPeriodicInterval">25</int>
+							</object>
+							<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+						</object>
 					</array>
-					<string key="NSFrameSize">{335, 98}</string>
+					<string key="NSFrameSize">{335, 118}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="390218461"/>
@@ -691,14 +727,6 @@
 					<object class="IBActionConnection" key="connection">
 						<string key="label">showPreferences:</string>
 						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="609285721"/>
-					</object>
-					<int key="connectionID">560</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
-						<string key="label">showPreferences:</string>
-						<reference key="source" ref="976324537"/>
 						<reference key="destination" ref="499444796"/>
 					</object>
 					<int key="connectionID">561</int>
@@ -753,14 +781,6 @@
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
-						<string key="label">toggleEnabledStatus:</string>
-						<reference key="source" ref="976324537"/>
-						<reference key="destination" ref="367102923"/>
-					</object>
-					<int key="connectionID">605</int>
-				</object>
-				<object class="IBConnectionRecord">
-					<object class="IBActionConnection" key="connection">
 						<string key="label">toggleAutoBrightness:</string>
 						<reference key="source" ref="976324537"/>
 						<reference key="destination" ref="1070461374"/>
@@ -774,6 +794,38 @@
 						<reference key="destination" ref="1070461374"/>
 					</object>
 					<int key="connectionID">612</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">manageBuiltinDisplayCheckbox</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="501470364"/>
+					</object>
+					<int key="connectionID">634</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">autoBrightnessCheckbox</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="1070461374"/>
+					</object>
+					<int key="connectionID">635</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">toggleBuiltinScreen:</string>
+						<reference key="source" ref="976324537"/>
+						<reference key="destination" ref="501470364"/>
+					</object>
+					<int key="connectionID">636</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBOutletConnection" key="connection">
+						<string key="label">delegate</string>
+						<reference key="source" ref="617353876"/>
+						<reference key="destination" ref="976324537"/>
+					</object>
+					<int key="connectionID">638</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBOutletConnection" key="connection">
@@ -1083,6 +1135,7 @@
 							<reference ref="390218461"/>
 							<reference ref="202820342"/>
 							<reference ref="1070461374"/>
+							<reference ref="501470364"/>
 						</array>
 						<reference key="parent" ref="576659139"/>
 					</object>
@@ -1181,6 +1234,19 @@
 						<reference key="object" ref="777134564"/>
 						<reference key="parent" ref="1070461374"/>
 					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">631</int>
+						<reference key="object" ref="501470364"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="978495358"/>
+						</array>
+						<reference key="parent" ref="994031347"/>
+					</object>
+					<object class="IBObjectRecord">
+						<int key="objectID">632</int>
+						<reference key="object" ref="978495358"/>
+						<reference key="parent" ref="501470364"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -1234,7 +1300,7 @@
 				<string key="554.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="559.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="56.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
-				<string key="562.IBPersistedLastKnownCanvasPosition">{222.5, 365}</string>
+				<string key="562.IBPersistedLastKnownCanvasPosition">{222.5, 375}</string>
 				<string key="562.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="562.IBWindowTemplateEditedContentRect">{{324, 816}, {335, 76}}</string>
 				<boolean value="NO" key="562.NSWindowTemplate.visibleAtLaunch"/>
@@ -1258,12 +1324,14 @@
 				<string key="606.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="607.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="608.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="631.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<string key="632.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">630</int>
+			<int key="maxID">638</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -1277,6 +1345,7 @@
 						<string key="showAbout:">id</string>
 						<string key="showPreferences:">id</string>
 						<string key="toggleAutoBrightness:">id</string>
+						<string key="toggleBuiltinScreen:">id</string>
 						<string key="toggleDockIcon:">id</string>
 						<string key="toggleEnabledStatus:">id</string>
 					</dictionary>
@@ -1305,6 +1374,10 @@
 							<string key="name">toggleAutoBrightness:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="toggleBuiltinScreen:">
+							<string key="name">toggleBuiltinScreen:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="toggleDockIcon:">
 							<string key="name">toggleDockIcon:</string>
 							<string key="candidateClassName">id</string>
@@ -1315,10 +1388,9 @@
 						</object>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="autoBrightness">NSButton</string>
+						<string key="autoBrightnessCheckbox">NSButton</string>
 						<string key="dockIconCheckbox">NSButton</string>
-						<string key="manageBuiltinScreen">NSButton</string>
-						<string key="manageScreensIndependently">NSButton</string>
+						<string key="manageBuiltinDisplayCheckbox">NSButton</string>
 						<string key="opacitySlider">NSSlider</string>
 						<string key="prefsWindow">NSPanel</string>
 						<string key="stateMenuItemMainMenu">NSMenuItem</string>
@@ -1326,20 +1398,16 @@
 						<string key="statusMenu">NSMenu</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="autoBrightness">
-							<string key="name">autoBrightness</string>
+						<object class="IBToOneOutletInfo" key="autoBrightnessCheckbox">
+							<string key="name">autoBrightnessCheckbox</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="dockIconCheckbox">
 							<string key="name">dockIconCheckbox</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
-						<object class="IBToOneOutletInfo" key="manageBuiltinScreen">
-							<string key="name">manageBuiltinScreen</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="manageScreensIndependently">
-							<string key="name">manageScreensIndependently</string>
+						<object class="IBToOneOutletInfo" key="manageBuiltinDisplayCheckbox">
+							<string key="name">manageBuiltinDisplayCheckbox</string>
 							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="opacitySlider">
@@ -1377,6 +1445,7 @@
 						<string key="showAbout:">id</string>
 						<string key="showPreferences:">id</string>
 						<string key="toggleAutoBrightness:">id</string>
+						<string key="toggleBuiltinScreen:">id</string>
 						<string key="toggleDockIcon:">id</string>
 						<string key="toggleEnabledStatus:">id</string>
 					</dictionary>
@@ -1403,6 +1472,10 @@
 						</object>
 						<object class="IBActionInfo" key="toggleAutoBrightness:">
 							<string key="name">toggleAutoBrightness:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="toggleBuiltinScreen:">
+							<string key="name">toggleBuiltinScreen:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 						<object class="IBActionInfo" key="toggleDockIcon:">

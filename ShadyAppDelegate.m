@@ -13,8 +13,8 @@
 #import <IOKit/IOKitLib.h>
 #import <mach/mach.h>
 
-#define OPACITY_UNIT				0.05; // "20 shades ought to be enough for _anybody_."
-#define DEFAULT_OPACITY				0.4
+#define OPACITY_UNIT				0.05 // "20 shades ought to be enough for _anybody_."
+#define DEFAULT_OPACITY				0.0
 
 #define STATE_MENU					NSLocalizedString(@"Turn Shady Off", nil) // global status menu-item title when enabled
 #define STATE_MENU_OFF				NSLocalizedString(@"Turn Shady On", nil) // global status menu-item title when disabled
@@ -28,31 +28,37 @@
 #define STATUS_MENU_ICON_OFF_ALT	[NSImage imageNamed:@"Shady_Menu_Light_Off"]
 
 #define MAX_OPACITY					0.90 // the darkest the screen can be, where 1.0 is pure black.
-#define KEY_OPACITY_OFFSET  @"ShadeSavedUserOpacityKey" // name of user opacity setting.
+#define KEY_OPACITY_OFFSET  @"ShadeSavedOpacityOffsetKey" // key for storing user's brightness offset.
 #define KEY_OPACITY					@"ShadySavedOpacityKey" // name of the saved opacity setting.
 #define KEY_DOCKICON				@"ShadySavedDockIconKey" // name of the saved dock icon state setting.
 #define KEY_ENABLED					@"ShadySavedEnabledKey" // name of the saved primary state setting.
 #define KEY_AUTOBRIGHTNESS  @"ShadySavedAutoBrightnessKey"  // name of the saved auto-brightness setting.
+#define KEY_BUILTIN_SCREEN  @"ShadySavedBuiltinScreenKey"  // name of the setting for managing built-in screen.
+#define KEY_OPACITY_INFO    @"ShadySavedOpacityInfoKey"   // name of saved per-screen opacity info
 
 #define MAX_LMU_VALUE           67092480  // ambient light sensor's max value
 #define AUTOBRIGHTNESS_INTERVAL 2.0 // timer interval (in seconds) for LMU query to automatically adjust brightness
+#define AUTOBRIGHTNESS_DURATION 1.33  // number of seconds it takes to animate opacity change due to change in ambien lighting
+
 
 @implementation ShadyAppDelegate {
   NSTimer *_autoBrightnessTimer;
   io_connect_t _dataPort;
   BOOL _autoBrightnessEnabled;
   float _lastKnownLMUValue;
+  NSMutableDictionary *_opacityInfo;
+  NSScreen *_builtinScreen;
 }
 
-@synthesize opacity;
-@synthesize opacityOffset;
 @synthesize statusMenu;
 @synthesize opacitySlider;
 @synthesize prefsWindow;
 @synthesize dockIconCheckbox;
 @synthesize stateMenuItemMainMenu;
 @synthesize stateMenuItemStatusBar;
-@synthesize autoBrightness;
+@synthesize autoBrightnessCheckbox;
+@synthesize manageBuiltinDisplayCheckbox;
+@synthesize managesBuiltinDisplay;
 
 #pragma mark Setup and Tear-down
 
@@ -62,12 +68,18 @@
 	// Set the default opacity value and load any saved settings.
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults registerDefaults:[NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_OPACITY,
-                              [NSNumber numberWithFloat:0.], KEY_OPACITY_OFFSET,
                               [NSNumber numberWithBool:YES], KEY_DOCKICON,
                               [NSNumber numberWithBool:YES], KEY_ENABLED,
-                              [NSNumber numberWithBool:NO], KEY_AUTOBRIGHTNESS,
+                              [NSNumber numberWithBool:YES], KEY_AUTOBRIGHTNESS,
+                              [NSNumber numberWithBool:NO], KEY_BUILTIN_SCREEN,
+                              [NSDictionary dictionary], KEY_OPACITY_INFO,
                               nil]];
+  
+  NSDictionary *info = [defaults dictionaryForKey:KEY_OPACITY_INFO];
+  if (info == nil) {
+    info = [NSDictionary dictionary];
+  }
+  _opacityInfo = [info mutableCopy];
 	
 	// Set up Dock icon.
 	BOOL showsDockIcon = [defaults boolForKey:KEY_DOCKICON];
@@ -77,12 +89,18 @@
 		[NSApp setShowsDockIcon:showsDockIcon];
 	}
   
+  BOOL hasBuiltinScreen = [self builtinScreen] != nil;
+  
   // Set up Auto Brightness
   BOOL isAutoBrightnessEnabled = [defaults boolForKey:KEY_AUTOBRIGHTNESS];
-  [autoBrightness setState:(isAutoBrightnessEnabled) ? NSOnState : NSOffState];
-  if (isAutoBrightnessEnabled) {
-    [self setAutoBrightnessEnabled:isAutoBrightnessEnabled];
-  }
+  [autoBrightnessCheckbox setState:(isAutoBrightnessEnabled) ? NSOnState : NSOffState];
+  [autoBrightnessCheckbox setEnabled:hasBuiltinScreen];
+  [self setAutoBrightnessEnabled:isAutoBrightnessEnabled];
+  
+  BOOL managesBuiltinScreen = [defaults boolForKey:KEY_BUILTIN_SCREEN];
+  self.managesBuiltinDisplay = managesBuiltinScreen;
+  [manageBuiltinDisplayCheckbox setState:(managesBuiltinScreen) ? NSOnState : NSOffState];
+  [manageBuiltinDisplayCheckbox setEnabled:hasBuiltinScreen];
 	
 	// Activate statusItem.
 	NSStatusBar *bar = [NSStatusBar systemStatusBar];
@@ -97,7 +115,6 @@
 	[altImage setTemplate:YES];
 	[statusItem setAlternateImage:altImage];
 	[statusItem setHighlightMode:YES];
-	[opacitySlider setFloatValue:(1.0 - opacity)];
 	[statusItem setMenu:statusMenu];
 	
 	// Set appropriate initial display state.
@@ -108,6 +125,10 @@
 	
 	// Create transparent windows
 	[self loadWindows];
+  
+  if (isAutoBrightnessEnabled) {
+    [self updateBrightnessFromLMU];
+  }
 	
 	// Put this app into the background (the shade won't hide due to how its window is set up above).
 	[NSApp hide:self];
@@ -128,8 +149,6 @@
 	
 	windows = nil; // released when closed.
 	helpWindow = nil; // released when closed.
-  
-  [self setAutoBrightnessEnabled:NO];
 	
 	[super dealloc];
 }
@@ -139,26 +158,12 @@
 	NSMutableArray* array = [[NSMutableArray alloc] init];
 	for( NSScreen* screen in [NSScreen screens] )
 	{
-		MGTransparentWindow* window;
-		window = [[MGTransparentWindow windowWithFrame:screen.frame] retain];
-		
-		// Configure window.
-		if( NSFoundationVersionNumber10_6 <= NSFoundationVersionNumber )
-			[window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorStationary];
-		else
-			[window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
-		[window setIgnoresMouseEvents:YES];
-		[window setLevel:NSScreenSaverWindowLevel];
-		[window setDelegate:self];
-		
-		// Configure contentView.
-		NSView *contentView = [window contentView];
-		[contentView setWantsLayer:YES];
-		CALayer *layer = [contentView layer];
-		layer.backgroundColor = CGColorGetConstantColor(kCGColorBlack);
-		layer.opacity = 0;
-		[window makeFirstResponder:contentView];
-		
+    NSNumber *screenNumber = [[screen deviceDescription] valueForKey:@"NSScreenNumber"];
+    if (self.managesBuiltinDisplay == NO
+        && CGDisplayIsBuiltin([screenNumber unsignedIntegerValue])) {
+      continue;
+    }
+    MGTransparentWindow* window = [self newWindowForScreen:screen];
 		[array addObject: window];
 	}
 	
@@ -166,12 +171,35 @@
 	windows = array;
 	
 	[self updateEnabledStatus];
-	self.opacity = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_OPACITY];
-  self.opacityOffset = [[NSUserDefaults standardUserDefaults] floatForKey:KEY_OPACITY_OFFSET];
+
 	
 	// Put window on screen.
 	[windows makeObjectsPerformSelector:@selector(makeKeyAndOrderFront:) withObject:self];
 	
+}
+
+- (MGTransparentWindow *)newWindowForScreen:(NSScreen *)screen
+{
+  MGTransparentWindow* window = [[MGTransparentWindow windowWithFrame:screen.frame] retain];
+		
+  // Configure window.
+  if( NSFoundationVersionNumber10_6 <= NSFoundationVersionNumber )
+    [window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorStationary];
+  else
+    [window setCollectionBehavior:NSWindowCollectionBehaviorCanJoinAllSpaces];
+  [window setIgnoresMouseEvents:YES];
+  [window setLevel:NSScreenSaverWindowLevel];
+  [window setDelegate:self];
+  
+  // Configure contentView.
+  NSView *contentView = [window contentView];
+  [contentView setWantsLayer:YES];
+  CALayer *layer = [contentView layer];
+  layer.backgroundColor = CGColorGetConstantColor(kCGColorBlack);
+  NSDictionary *info = [self opacityInfoForScreen:screen];
+  layer.opacity = [[info valueForKey:KEY_OPACITY] floatValue];
+  [window makeFirstResponder:contentView];
+  return window;
 }
 
 #pragma mark Notifications handlers
@@ -180,6 +208,9 @@
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification
 {
 	[self applicationActiveStateChanged:aNotification];
+  if (_autoBrightnessEnabled) {
+    [self updateBrightnessFromLMU];
+  }
 }
 
 
@@ -243,7 +274,12 @@
 {
 	// i.e. make screen darker by making our mask less transparent.
 	if (shadyEnabled) {
-		self.opacity = opacity + OPACITY_UNIT;
+    NSScreen *mainScreen = [NSScreen mainScreen];
+    NSDictionary *info = [self opacityInfoForScreen:mainScreen];
+    float newOpacity = [[info valueForKey:KEY_OPACITY] floatValue] + OPACITY_UNIT;
+    [self setOpacity:newOpacity
+           onScreens:[NSArray arrayWithObject:mainScreen]
+        withDuration:0.];
 	} else {
 		NSBeep();
 	}
@@ -254,7 +290,12 @@
 {
 	// i.e. make screen lighter by making our mask more transparent.
 	if (shadyEnabled) {
-		self.opacity = opacity - OPACITY_UNIT;
+    NSScreen *mainScreen = [NSScreen mainScreen];
+    NSDictionary *info = [self opacityInfoForScreen:mainScreen];
+    float newOpacity = [[info valueForKey:KEY_OPACITY] floatValue] - OPACITY_UNIT;
+    [self setOpacity:newOpacity
+           onScreens:[NSArray arrayWithObject:mainScreen]
+        withDuration:0.];
 	} else {
 		NSBeep();
 	}
@@ -264,8 +305,25 @@
 - (IBAction)opacitySliderChanged:(id)sender
 {
   float sliderValue = [sender floatValue];
-  self.opacityOffset += (1.0 - self.opacity) - sliderValue;
-	self.opacity = (1.0 - sliderValue);
+  NSScreen *mainScreen = [NSScreen mainScreen];
+  NSMutableDictionary *info = [[self opacityInfoForScreen:mainScreen] mutableCopy];
+  float offset = [[info valueForKey:KEY_OPACITY_OFFSET] floatValue];
+  float opacity = [[info valueForKey:KEY_OPACITY] floatValue];
+  offset = (1.0 - opacity) + offset - sliderValue;
+	opacity = (1.0 - sliderValue);
+  
+  [info setValue:[NSNumber numberWithFloat:opacity] forKey:KEY_OPACITY];
+  [info setValue:[NSNumber numberWithFloat:offset] forKey:KEY_OPACITY_OFFSET];
+  NSNumber *displayNumber = [[mainScreen deviceDescription] valueForKey:@"NSScreenNumber"];
+  [_opacityInfo setObject:info forKey:[displayNumber stringValue]];
+  
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:_opacityInfo forKey:KEY_OPACITY_INFO];
+  [defaults synchronize];
+
+  [self setOpacity:opacity
+         onScreens:[NSArray arrayWithObject:mainScreen]
+      withDuration:0.];
 }
 
 
@@ -291,6 +349,14 @@
   [defaults setBool:enabled forKey:KEY_AUTOBRIGHTNESS];
   [defaults synchronize];
   [self setAutoBrightnessEnabled:enabled];
+}
+
+- (IBAction)toggleBuiltinScreen:(id)sender {
+  BOOL enabled = [sender state] != NSOffState;
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setBool:enabled forKey:KEY_BUILTIN_SCREEN];
+  [defaults synchronize];
+  self.managesBuiltinDisplay = enabled;
 }
 
 
@@ -474,22 +540,21 @@
     return;
   }
   
-  NSScreen *nativeScreen = [[NSScreen screens] firstObject];
-  NSMutableArray *targetWindows = [NSMutableArray array];
-  for (NSWindow *window in windows) {
-    if (window.screen == nativeScreen) {
-      continue;
-    }
-    [targetWindows addObject:window];
+  float baseOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
+  baseOpacity = roundf(baseOpacity * 100.)/100.;
+  
+  for (MGTransparentWindow *window in windows) {
+    NSScreen *screen = window.screen;
+    NSDictionary *info = [self opacityInfoForScreen:screen];
+    float currentOffset = [[info valueForKey:KEY_OPACITY_OFFSET] floatValue];
+    float newOpacity = MIN(MAX_OPACITY, baseOpacity + currentOffset);
+//    NSLog(@"Screen: %@; LMU: %f; opacity: %f (%f + %f)", [[screen deviceDescription] valueForKey:@"NSScreenNumber"], currentLMUValue, newOpacity, baseOpacity, currentOffset);
+    [self setOpacity:newOpacity
+           onScreens:[NSArray arrayWithObject:screen]
+        withDuration:AUTOBRIGHTNESS_DURATION];
   }
   
-  float newOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
-  newOpacity = MIN(MAX_OPACITY, ((roundf(newOpacity * 100.)/100.) + self.opacityOffset));
-//  NSLog(@"LMU: %f; opacity: %f; offset: %f", currentLMUValue, newOpacity, self.opacityOffset);
-  
   _lastKnownLMUValue = currentLMUValue;
-  
-  [self setOpacity:newOpacity onWindows:targetWindows withDuration:1.33];
 }
 
 - (float) currentLMUValue {
@@ -509,6 +574,56 @@
   }
   
   return NSNotFound;
+}
+
+#pragma mark Builtin Screen
+
+- (NSScreen *)builtinScreen
+{
+  if (_builtinScreen == nil) {
+    NSArray *allScreens = [NSScreen screens];
+    for (NSScreen *screen in allScreens) {
+      NSNumber *screenNumber = [[screen deviceDescription] objectForKey:@"NSScreenNumber"];
+      if (CGDisplayIsBuiltin([screenNumber unsignedIntegerValue])) {
+        _builtinScreen = screen;
+        break;
+      }
+    }
+  }
+  return _builtinScreen;
+}
+
+- (void)setManagesBuiltinDisplay:(BOOL)enabled
+{
+  if (managesBuiltinDisplay == enabled) {
+    return;
+  }
+  
+  managesBuiltinDisplay = enabled;
+  
+  if (windows.count == 0) {
+    return;
+  }
+  
+  NSScreen *builtinScreen = [self builtinScreen];
+  if (builtinScreen == nil) {
+    return;
+  }
+  
+  if (enabled) {
+    MGTransparentWindow *window = [self newWindowForScreen:builtinScreen];
+    [windows addObject:window];
+    [window makeKeyAndOrderFront:self];
+  }
+  else {
+    for (NSWindow *window in windows) {
+      if (window.screen == builtinScreen) {
+        [windows removeObject:window];
+        [window close];
+        break;
+      }
+    }
+  }
 }
 
 #pragma mark Accessors
@@ -536,36 +651,71 @@
          onWindows:(NSArray *)targetWindows
       withDuration:(NSTimeInterval)duration
 {
-  float normalisedOpacity = MIN(MAX_OPACITY, MAX(newOpacity, 0.0));
-  if (normalisedOpacity != opacity) {
-    opacity = normalisedOpacity;
-    
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setFloat:opacity forKey:KEY_OPACITY];
-    [defaults synchronize];
-  }
+  float normalizedOpacity = MIN(MAX_OPACITY, MAX(newOpacity, 0.));
   
   if (targetWindows == nil) {
     targetWindows = windows;
   }
   
+  BOOL changed = NO;
   for(MGTransparentWindow* window in targetWindows) {
-    [window setOpacity:newOpacity duration:duration];
+    NSScreen *screen = window.screen;
+    NSMutableDictionary *info = [[self opacityInfoForScreen:screen] mutableCopy];
+    [info setValue:[NSNumber numberWithFloat:normalizedOpacity] forKey:KEY_OPACITY];
+    changed = YES;
+    NSNumber *screenNumber = [[screen deviceDescription] valueForKey:@"NSScreenNumber"];
+    [_opacityInfo setObject:info forKey:[screenNumber stringValue]];
+    [window setOpacity:normalizedOpacity duration:duration];
   }
   
+  if (changed) {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:_opacityInfo forKey:KEY_OPACITY_INFO];
+    [defaults synchronize];
+  }
+}
+
+- (NSDictionary *)opacityInfoForScreen:(NSScreen *)screen
+{
+  NSNumber *screenNumber = [[screen deviceDescription] valueForKey:@"NSScreenNumber"];
+  NSString *key = [screenNumber stringValue];
+  NSDictionary *info = [_opacityInfo valueForKey:key];
+  if (info == nil) {
+    info = [self defaultOpacityInfo];
+    [_opacityInfo setValue:info forKey:key];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:_opacityInfo forKey:KEY_OPACITY_INFO];
+    [defaults synchronize];
+  }
+  return info;
+}
+
+- (NSDictionary *)defaultOpacityInfo
+{
+  NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:
+                        [NSNumber numberWithFloat:DEFAULT_OPACITY], KEY_OPACITY,
+                        [NSNumber numberWithFloat:0.], KEY_OPACITY_OFFSET,
+                        nil];
+  return info;
+}
+
+#pragma mark NSMenuDelegate
+- (void)menuWillOpen:(NSMenu *)menu {
+  if (menu != statusMenu) {
+    return;
+  }
+  NSScreen *mainScreen = [NSScreen mainScreen];
+  NSDictionary *info = [self opacityInfoForScreen:mainScreen];
+  float opacity = [[info valueForKey:KEY_OPACITY] floatValue];
   [opacitySlider setFloatValue:(1.0 - opacity)];
-}
-
-- (void)setOpacity:(float)newOpacity
-{
-  [self setOpacity:newOpacity
-         onScreens:nil
-      withDuration:0.];
-}
-
--(float)opacity
-{
-	return opacity;
+  
+  if (self.managesBuiltinDisplay == NO
+      && mainScreen == [self builtinScreen]) {
+    [opacitySlider setEnabled:NO];
+  }
+  else {
+    [opacitySlider setEnabled:YES];
+  }
 }
 
 @end
