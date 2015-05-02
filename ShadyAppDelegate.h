@@ -32,6 +32,7 @@
 @property (assign) IBOutlet NSButton *autoBrightnessCheckbox;
 @property (assign) IBOutlet NSButton *manageBuiltinDisplayCheckbox;
 @property (assign, nonatomic) BOOL managesBuiltinDisplay;
+@property (readonly, nonatomic) BOOL hasBuiltinDisplay;
 
 
 - (IBAction)showAbout:(id)sender;

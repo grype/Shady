@@ -89,7 +89,7 @@
 		[NSApp setShowsDockIcon:showsDockIcon];
 	}
   
-  BOOL hasBuiltinScreen = [self builtinScreen] != nil;
+  BOOL hasBuiltinScreen = [self hasBuiltinDisplay];
   
   // Set up Auto Brightness
   BOOL isAutoBrightnessEnabled = [defaults boolForKey:KEY_AUTOBRIGHTNESS];
@@ -591,6 +591,10 @@
     }
   }
   return _builtinScreen;
+}
+
+- (BOOL)hasBuiltinDisplay {
+  return [self builtinScreen] != nil;
 }
 
 - (void)setManagesBuiltinDisplay:(BOOL)enabled

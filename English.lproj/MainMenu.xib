@@ -380,7 +380,6 @@
 						<int key="NSvFlags">265</int>
 						<string key="NSFrame">{{152, 10}, {36, 17}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="974717851">
@@ -420,7 +419,6 @@
 						<int key="NSvFlags">268</int>
 						<string key="NSFrame">{{5, 10}, {34, 17}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="365106183"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSTextFieldCell" key="NSCell" id="861456655">
@@ -440,7 +438,6 @@
 						<int key="NSvFlags">266</int>
 						<string key="NSFrame">{{42, 6}, {107, 21}}</string>
 						<reference key="NSSuperview" ref="727628101"/>
-						<reference key="NSWindow"/>
 						<reference key="NSNextKeyView" ref="439073888"/>
 						<bool key="NSEnabled">YES</bool>
 						<object class="NSSliderCell" key="NSCell" id="867532400">
@@ -462,7 +459,6 @@
 				</array>
 				<string key="NSFrameSize">{195, 34}</string>
 				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView" ref="669160261"/>
 				<string key="NSClassName">NSView</string>
 			</object>
@@ -484,7 +480,6 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{18, 82}, {122, 18}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="202820342"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="336354249">
@@ -514,7 +509,6 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{38, 62}, {280, 14}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="1070461374"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="84142558">
@@ -538,7 +532,6 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{18, 38}, {220, 18}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="501470364"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
@@ -565,7 +558,6 @@
 							<int key="NSvFlags">268</int>
 							<string key="NSFrame">{{18, 18}, {171, 18}}</string>
 							<reference key="NSSuperview" ref="994031347"/>
-							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView"/>
 							<string key="NSReuseIdentifierKey">_NS:9</string>
 							<bool key="NSEnabled">YES</bool>
@@ -590,7 +582,6 @@
 					</array>
 					<string key="NSFrameSize">{335, 118}</string>
 					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="390218461"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1280, 778}}</string>
@@ -1331,201 +1322,9 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">638</int>
+			<int key="maxID">640</int>
 		</object>
-		<object class="IBClassDescriber" key="IBDocument.Classes">
-			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
-				<object class="IBPartialClassDescription">
-					<string key="className">ShadyAppDelegate</string>
-					<string key="superclassName">NSObject</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="decreaseOpacity:">id</string>
-						<string key="increaseOpacity:">id</string>
-						<string key="opacitySliderChanged:">id</string>
-						<string key="showAbout:">id</string>
-						<string key="showPreferences:">id</string>
-						<string key="toggleAutoBrightness:">id</string>
-						<string key="toggleBuiltinScreen:">id</string>
-						<string key="toggleDockIcon:">id</string>
-						<string key="toggleEnabledStatus:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="decreaseOpacity:">
-							<string key="name">decreaseOpacity:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="increaseOpacity:">
-							<string key="name">increaseOpacity:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="opacitySliderChanged:">
-							<string key="name">opacitySliderChanged:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="showAbout:">
-							<string key="name">showAbout:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="showPreferences:">
-							<string key="name">showPreferences:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleAutoBrightness:">
-							<string key="name">toggleAutoBrightness:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleBuiltinScreen:">
-							<string key="name">toggleBuiltinScreen:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleDockIcon:">
-							<string key="name">toggleDockIcon:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleEnabledStatus:">
-							<string key="name">toggleEnabledStatus:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="outlets">
-						<string key="autoBrightnessCheckbox">NSButton</string>
-						<string key="dockIconCheckbox">NSButton</string>
-						<string key="manageBuiltinDisplayCheckbox">NSButton</string>
-						<string key="opacitySlider">NSSlider</string>
-						<string key="prefsWindow">NSPanel</string>
-						<string key="stateMenuItemMainMenu">NSMenuItem</string>
-						<string key="stateMenuItemStatusBar">NSMenuItem</string>
-						<string key="statusMenu">NSMenu</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<object class="IBToOneOutletInfo" key="autoBrightnessCheckbox">
-							<string key="name">autoBrightnessCheckbox</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="dockIconCheckbox">
-							<string key="name">dockIconCheckbox</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="manageBuiltinDisplayCheckbox">
-							<string key="name">manageBuiltinDisplayCheckbox</string>
-							<string key="candidateClassName">NSButton</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="opacitySlider">
-							<string key="name">opacitySlider</string>
-							<string key="candidateClassName">NSSlider</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="prefsWindow">
-							<string key="name">prefsWindow</string>
-							<string key="candidateClassName">NSPanel</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stateMenuItemMainMenu">
-							<string key="name">stateMenuItemMainMenu</string>
-							<string key="candidateClassName">NSMenuItem</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="stateMenuItemStatusBar">
-							<string key="name">stateMenuItemStatusBar</string>
-							<string key="candidateClassName">NSMenuItem</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="statusMenu">
-							<string key="name">statusMenu</string>
-							<string key="candidateClassName">NSMenu</string>
-						</object>
-					</dictionary>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../ShadyAppDelegate.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">ShadyAppDelegate</string>
-					<dictionary class="NSMutableDictionary" key="actions">
-						<string key="decreaseOpacity:">id</string>
-						<string key="increaseOpacity:">id</string>
-						<string key="opacitySliderChanged:">id</string>
-						<string key="showAbout:">id</string>
-						<string key="showPreferences:">id</string>
-						<string key="toggleAutoBrightness:">id</string>
-						<string key="toggleBuiltinScreen:">id</string>
-						<string key="toggleDockIcon:">id</string>
-						<string key="toggleEnabledStatus:">id</string>
-					</dictionary>
-					<dictionary class="NSMutableDictionary" key="actionInfosByName">
-						<object class="IBActionInfo" key="decreaseOpacity:">
-							<string key="name">decreaseOpacity:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="increaseOpacity:">
-							<string key="name">increaseOpacity:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="opacitySliderChanged:">
-							<string key="name">opacitySliderChanged:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="showAbout:">
-							<string key="name">showAbout:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="showPreferences:">
-							<string key="name">showPreferences:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleAutoBrightness:">
-							<string key="name">toggleAutoBrightness:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleBuiltinScreen:">
-							<string key="name">toggleBuiltinScreen:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleDockIcon:">
-							<string key="name">toggleDockIcon:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-						<object class="IBActionInfo" key="toggleEnabledStatus:">
-							<string key="name">toggleEnabledStatus:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</dictionary>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">../ShadyAppDelegate.m</string>
-					</object>
-				</object>
-			</array>
-			<array class="NSMutableArray" key="referencedPartialClassDescriptionsV3.2+">
-				<object class="IBPartialClassDescription">
-					<string key="className">SUUpdater</string>
-					<string key="superclassName">NSObject</string>
-					<object class="NSMutableDictionary" key="actions">
-						<string key="NS.key.0">checkForUpdates:</string>
-						<string key="NS.object.0">id</string>
-					</object>
-					<object class="NSMutableDictionary" key="actionInfosByName">
-						<string key="NS.key.0">checkForUpdates:</string>
-						<object class="IBActionInfo" key="NS.object.0">
-							<string key="name">checkForUpdates:</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</object>
-					<object class="NSMutableDictionary" key="outlets">
-						<string key="NS.key.0">delegate</string>
-						<string key="NS.object.0">id</string>
-					</object>
-					<object class="NSMutableDictionary" key="toOneOutletInfosByName">
-						<string key="NS.key.0">delegate</string>
-						<object class="IBToOneOutletInfo" key="NS.object.0">
-							<string key="name">delegate</string>
-							<string key="candidateClassName">id</string>
-						</object>
-					</object>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">Sparkle.framework/Headers/SUUpdater.h</string>
-					</object>
-				</object>
-			</array>
-		</object>
+		<object class="IBClassDescriber" key="IBDocument.Classes"/>
 		<int key="IBDocument.localizationMode">0</int>
 		<string key="IBDocument.TargetRuntimeIdentifier">IBCocoaFramework</string>
 		<bool key="IBDocument.previouslyAttemptedUpgradeToXcode5">NO</bool>
