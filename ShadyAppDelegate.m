@@ -37,7 +37,7 @@
 #define KEY_OPACITY_INFO    @"ShadySavedOpacityInfoKey"   // name of saved per-screen opacity info.
 #define KEY_UNIFIED_BRIGHTNESS  @"ShadySavedUnifiedBrightnessKey" // name of setting for controlling brightness of all displays.
 
-#define MAX_LMU_VALUE           67092480  // ambient light sensor's max value
+#define MAX_LMU_VALUE           10000000  // ambient light sensor's max value is 67092480, but we'll treat anything above this value as - maximum brightness
 #define AUTOBRIGHTNESS_INTERVAL 2.0 // timer interval (in seconds) for LMU query to automatically adjust brightness
 #define AUTOBRIGHTNESS_DURATION 1.33  // number of seconds it takes to animate opacity change due to change in ambien lighting
 
