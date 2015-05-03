@@ -318,7 +318,8 @@
   
   float newOpacity = 1. - [sender floatValue];
   float delta = newOpacity - previousUnadjustedValue;
-  float newOffset = delta / MAX(previousUnadjustedValue, newOpacity);
+  float deviation = MAX(previousUnadjustedValue, newOpacity);
+  float newOffset = (deviation == 0) ? 0 : (delta / deviation);
   
   [info setValue:[NSNumber numberWithFloat:newOpacity] forKey:KEY_OPACITY];
   [info setValue:[NSNumber numberWithFloat:newOffset] forKey:KEY_OPACITY_OFFSET];
