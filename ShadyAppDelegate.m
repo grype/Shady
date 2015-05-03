@@ -570,7 +570,6 @@
   }
   
   float baseOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
-//  baseOpacity = roundf(baseOpacity * 100.)/100.;
   
   for (MGTransparentWindow *window in windows) {
     NSScreen *screen = window.screen;
@@ -578,7 +577,7 @@
     float currentOffset = [[info valueForKey:KEY_OPACITY_OFFSET] floatValue];
     float newOpacity = MIN(MAX_OPACITY, baseOpacity + (baseOpacity * currentOffset));
     newOpacity = roundf(newOpacity * 100.)/100.;
-    NSLog(@"Screen: %@; LMU: %f; opacity: %f (%f + %f)", [[screen deviceDescription] valueForKey:@"NSScreenNumber"], currentLMUValue, newOpacity, baseOpacity, baseOpacity * currentOffset);
+//    NSLog(@"Screen: %@; LMU: %f; opacity: %f (%f + %f)", [[screen deviceDescription] valueForKey:@"NSScreenNumber"], currentLMUValue, newOpacity, baseOpacity, baseOpacity * currentOffset);
     [self setOpacity:newOpacity
            onScreens:[NSArray arrayWithObject:screen]
         withDuration:AUTOBRIGHTNESS_DURATION];
