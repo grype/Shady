@@ -307,34 +307,36 @@
 	}
 }
 
-
 - (IBAction)opacitySliderChanged:(id)sender
 {
-  float sliderValue = [sender floatValue];
   NSScreen *mainScreen = [NSScreen mainScreen];
   NSMutableDictionary *info = [[self opacityInfoForScreen:mainScreen] mutableCopy];
+  
   float offset = [[info valueForKey:KEY_OPACITY_OFFSET] floatValue];
   float opacity = [[info valueForKey:KEY_OPACITY] floatValue];
-  offset = (1.0 - opacity) + offset - sliderValue;
-	opacity = (1.0 - sliderValue);
+  float previousUnadjustedValue = opacity - (offset * opacity);
   
-  [info setValue:[NSNumber numberWithFloat:opacity] forKey:KEY_OPACITY];
-  [info setValue:[NSNumber numberWithFloat:offset] forKey:KEY_OPACITY_OFFSET];
+  float newOpacity = 1. - [sender floatValue];
+  float delta = newOpacity - previousUnadjustedValue;
+  float newOffset = delta / MAX(previousUnadjustedValue, newOpacity);
+  
+  [info setValue:[NSNumber numberWithFloat:newOpacity] forKey:KEY_OPACITY];
+  [info setValue:[NSNumber numberWithFloat:newOffset] forKey:KEY_OPACITY_OFFSET];
   NSNumber *displayNumber = [[mainScreen deviceDescription] valueForKey:@"NSScreenNumber"];
   [_opacityInfo setObject:info forKey:[displayNumber stringValue]];
   
   NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
   [defaults setObject:_opacityInfo forKey:KEY_OPACITY_INFO];
   [defaults synchronize];
-
+  
   BOOL unifiedBrightnessEnabled = [[NSUserDefaults standardUserDefaults] boolForKey:KEY_UNIFIED_BRIGHTNESS];
   if (unifiedBrightnessEnabled) {
-    [self setOpacity:opacity
+    [self setOpacity:newOpacity
            onWindows:nil
         withDuration:0.];
   }
   else {
-    [self setOpacity:opacity
+    [self setOpacity:newOpacity
            onScreens:[NSArray arrayWithObject:mainScreen]
         withDuration:0.];
   }
@@ -568,14 +570,15 @@
   }
   
   float baseOpacity = 1.0 - (log(MAX(1., currentLMUValue)) / log(MAX_LMU_VALUE));
-  baseOpacity = roundf(baseOpacity * 100.)/100.;
+//  baseOpacity = roundf(baseOpacity * 100.)/100.;
   
   for (MGTransparentWindow *window in windows) {
     NSScreen *screen = window.screen;
     NSDictionary *info = [self opacityInfoForScreen:screen];
     float currentOffset = [[info valueForKey:KEY_OPACITY_OFFSET] floatValue];
-    float newOpacity = MIN(MAX_OPACITY, baseOpacity + currentOffset);
-//    NSLog(@"Screen: %@; LMU: %f; opacity: %f (%f + %f)", [[screen deviceDescription] valueForKey:@"NSScreenNumber"], currentLMUValue, newOpacity, baseOpacity, currentOffset);
+    float newOpacity = MIN(MAX_OPACITY, baseOpacity + (baseOpacity * currentOffset));
+    newOpacity = roundf(newOpacity * 100.)/100.;
+    NSLog(@"Screen: %@; LMU: %f; opacity: %f (%f + %f)", [[screen deviceDescription] valueForKey:@"NSScreenNumber"], currentLMUValue, newOpacity, baseOpacity, baseOpacity * currentOffset);
     [self setOpacity:newOpacity
            onScreens:[NSArray arrayWithObject:screen]
         withDuration:AUTOBRIGHTNESS_DURATION];
