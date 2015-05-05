@@ -140,7 +140,6 @@
 	[NSApp hide:self];
 }
 
-
 - (void)dealloc
 {
 	if (statusItem) {
@@ -245,7 +244,9 @@
 
 - (void)applicationDidChangeScreenParameters:(NSNotification *)aNotification
 {
+  if (windows.count > 0) {
 	[windows[0] removeChildWindow:helpWindow];
+  }
 	
 	[helpWindow close];
 	[windows makeObjectsPerformSelector:@selector(close)];
