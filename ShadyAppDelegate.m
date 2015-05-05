@@ -245,7 +245,7 @@
 - (void)applicationDidChangeScreenParameters:(NSNotification *)aNotification
 {
   if (windows.count > 0) {
-	[windows[0] removeChildWindow:helpWindow];
+    [windows[0] removeChildWindow:helpWindow];
   }
 	
 	[helpWindow close];
@@ -255,8 +255,13 @@
 	windows = nil; // released when closed.
 	helpWindow = nil; // released when closed.
 	
-	
 	[self loadWindows];
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  BOOL isAutoBrightnessEnabled = [defaults boolForKey:KEY_AUTOBRIGHTNESS];
+  if (isAutoBrightnessEnabled) {
+    _lastKnownLMUValue = 0.;
+    [self updateBrightnessFromLMU];
+  }
 }
 
 #pragma mark IBActions
